@@ -1,0 +1,67 @@
+config:
+  target: 'http://localhost:3001'
+  phases:
+    # HYPERCONTENTION: All users hit the EXACT same product simultaneously
+    - duration: 5
+      arrivalRate: 200
+      name: "🔥 HYPERCONTENTION: Everyone targets iPhone simultaneously"
+    # Brief pause to let locks expire
+    - duration: 3
+      arrivalRate: 0  
+      name: "⏱️  Lock expiration pause"
+    # Second wave of hypercontention
+    - duration: 5
+      arrivalRate: 300
+      name: "🚀 SECOND WAVE: Even more users target iPhone"
+
+  plugins:
+    hdrhistogram: {}
+    metrics-by-endpoint:
+      useOnlyRequestNames: true
+
+  variables:
+    # SINGLE TARGET: Everyone fights for iPhone (Product ID 1)
+    targetProduct: 1
+    
+scenarios:
+  # 100% of users target the EXACT same product with SAME stock level
+  - name: "🎯 Maximum Contention - Single Product Rush"
+    weight: 100
+    flow:
+      # Direct order attempt - no browsing, no delays
+      - post:
+          url: "/api/v1/orders"
+          json:
+            productId: "{{ targetProduct }}"
+            userId: "contender_{{ $randomString() }}_{{ $timestamp }}_{{ $randomInt(1, 50000) }}"
+            quantity: 1
+          capture:
+            - json: "$.orderId"
+              as: "orderId"
+            - json: "$.jobId"
+              as: "jobId"
+            - statusCode:
+              as: "orderStatus"
+          expect:
+            - statusCode: [200, 201, 400, 409, 422, 429]
+          
+          # Track different response types for analysis
+          match:
+            - statusCode: 201
+              capture:
+                - json: "$.orderId"
+                  as: "successfulOrderId"
+            - statusCode: 400
+              capture:
+                - json: "$.message"
+                  as: "lockContentionMessage"
+            - statusCode: 429
+              capture:
+                - json: "$.message"
+                  as: "rateLimitMessage"
+
+# This configuration creates MAXIMUM contention:
+# - ALL users target Product ID 1 (iPhone)
+# - No delays between requests
+# - High arrival rate in short bursts
+# - Tests distributed locking under extreme pressure

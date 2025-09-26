@@ -1,0 +1,73 @@
+config:
+  target: 'http://localhost:3001'
+  phases:
+    # Stage 1: Limited stock setup (only 5 units available)
+    - duration: 10
+      arrivalRate: 50
+      name: "📦 Limited Stock Rush: 5 units, 500 users"
+    # Stage 2: Sold out scenario
+    - duration: 10
+      arrivalRate: 100
+      name: "🚫 Sold Out Scenario: 1000 more users after stock depleted"
+
+  plugins:
+    hdrhistogram: {}
+    metrics-by-endpoint:
+      useOnlyRequestNames: true
+
+  variables:
+    # Target a product with very limited stock
+    limitedProduct: 1  # iPhone with only 5 units (after setup script)
+    
+scenarios:
+  # 90% target the limited stock product (iPhone)
+  - name: "⚡ Limited Stock Contention - iPhone (5 units)"
+    weight: 90
+    flow:
+      # Immediate order attempt
+      - post:
+          url: "/api/v1/orders"
+          json:
+            productId: "{{ limitedProduct }}"
+            userId: "limited_rush_{{ $randomString() }}_{{ $timestamp }}"
+            quantity: 1
+          capture:
+            - json: "$.orderId"
+              as: "orderId"
+            - json: "$.message"
+              as: "responseMessage"
+            - statusCode:
+              as: "statusCode"
+          expect:
+            - statusCode: [200, 201, 400, 404, 409, 422, 429]
+
+      # Check if order was successful and get queue position
+      - get:
+          url: "/api/v1/orders/{{ orderId }}"
+          ifTrue: "orderId"
+          capture:
+            - json: "$.status"
+              as: "finalOrderStatus"
+          expect:
+            - statusCode: [200, 404]
+
+  # 10% check inventory status during the rush
+  - name: "📊 Real-time Stock Monitoring"
+    weight: 10
+    flow:
+      - get:
+          url: "/api/v1/inventory/{{ limitedProduct }}"
+          capture:
+            - json: "$.currentStock"
+              as: "remainingStock"
+            - json: "$.name"
+              as: "productName"
+          expect:
+            - statusCode: 200
+
+      # Brief pause then check again
+      - think: 1
+      - get:
+          url: "/api/v1/inventory"
+          expect:
+            - statusCode: 200

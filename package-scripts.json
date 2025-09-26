@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "db:create": "createdb flash_sale_db",
+    "db:drop": "dropdb flash_sale_db",
+    "db:reset": "npm run db:drop && npm run db:create",
+    "seed": "ts-node scripts/seed.ts",
+    "load-test": "artillery run load-test/artillery.yml",
+    "redis:start": "redis-server",
+    "postgres:start": "pg_ctl start",
+    "services:start": "concurrently \"npm run redis:start\" \"npm run postgres:start\"",
+    "dev:full": "concurrently \"npm run services:start\" \"npm run start:dev\""
+  }
+}

@@ -1,0 +1,44 @@
+config:
+  target: 'http://localhost:3001'
+  phases:
+    # MAXIMUM CONTENTION: 1000 users, 1 product unit
+    - duration: 8
+      arrivalRate: 125  # 1000 users in 8 seconds
+      name: "🔥 1000 Users vs 1 Product Unit"
+
+  plugins:
+    hdrhistogram: {}
+    metrics-by-endpoint:
+      useOnlyRequestNames: true
+
+  variables:
+    # Single unit product (Apple Watch ID 5)
+    singleUnitProduct: 5
+    
+scenarios:
+  # Everyone targets the single unit
+  - name: "⚡ Single Unit Maximum Contention"
+    weight: 100
+    flow:
+      - post:
+          url: "/api/v1/orders"
+          json:
+            productId: "{{ singleUnitProduct }}"
+            userId: "single_unit_{{ $randomString() }}_{{ $timestamp }}_{{ $randomInt(1, 1000) }}"
+            quantity: 1
+          capture:
+            - json: "$.orderId"
+              as: "orderId"
+            - json: "$.jobId"
+              as: "jobId"
+            - json: "$.message"
+              as: "message"
+            - statusCode:
+              as: "status"
+          expect:
+            - statusCode: [200, 201, 400, 409, 422, 429]
+
+# Expected Results:
+# - Only 1 successful order (201 status)
+# - ~999 lock contention errors (400 status)
+# - Demonstrates distributed locking effectiveness

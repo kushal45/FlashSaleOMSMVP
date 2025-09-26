@@ -1,0 +1,143 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "uid": "flash-sale-dashboard",
+  "links": [],
+  "panels": [
+    {
+      "title": "🔥 Flash Sale - Orders By Status",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "flash_sale_orders_total",
+          "legendFormat": "{{status}}",
+          "refId": "A"
+        }
+      ],
+      "datasource": "Prometheus",
+      "yAxes": [
+        {
+          "label": "Orders",
+          "show": true
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "title": "📊 Error Rate",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "flash_sale_error_rate",
+          "legendFormat": "Error Rate (%)",
+          "refId": "A"
+        }
+      ],
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      }
+    },
+    {
+      "title": "💰 Success vs Failure Orders",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "flash_sale_orders_total{status=\"success\"}",
+          "legendFormat": "✅ Successful Orders",
+          "refId": "A"
+        },
+        {
+          "expr": "flash_sale_orders_total{status=\"failed\"}",
+          "legendFormat": "❌ Failed Orders",
+          "refId": "B"
+        },
+        {
+          "expr": "flash_sale_orders_total{status=\"pending\"}",
+          "legendFormat": "🕒 Pending Orders",
+          "refId": "C"
+        }
+      ],
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      }
+    },
+    {
+      "title": "🏪 Inventory Levels Real-time",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "flash_sale_inventory_levels",
+          "legendFormat": "Product {{product_id}}",
+          "refId": "A"
+        }
+      ],
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      }
+    },
+    {
+      "title": "🔄 Queue Length",
+      "type": "graph", 
+      "targets": [
+        {
+          "expr": "flash_sale_queue_length",
+          "legendFormat": "Queue Length",
+          "refId": "A"
+        }
+      ],
+      "datasource": "Prometheus",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      }
+    }
+  ],
+  "schemaVersion": 26,
+  "style": "dark",
+  "tags": ["flash-sale", "load-testing"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "🔥 Flash Sale Load Testing Dashboard",
+  "version": 1
+}

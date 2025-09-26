@@ -1,0 +1,129 @@
+# Extreme Flash Sale Scenario - Single Product, High Contention
+# Simulates Black Friday / Cyber Monday conditions
+# 2000 users competing for 50 items in 60 seconds
+
+config:
+  target: 'http://localhost:3001'
+  phases:
+    # Flash sale countdown - users getting ready
+    - duration: 5
+      arrivalRate: 10
+      name: "Pre-sale positioning"
+    
+    # FLASH SALE OPENS - Massive spike
+    - duration: 10
+      arrivalRate: 500
+      name: "Flash sale opens - RUSH!"
+    
+    # Continued assault as users retry
+    - duration: 20
+      arrivalRate: 300
+      name: "Retry storm"
+      
+    # Desperate final attempts
+    - duration: 15
+      arrivalRate: 150
+      name: "Last chance attempts"
+    
+    # Post-flash sale - checking results
+    - duration: 10
+      arrivalRate: 50
+      name: "Post-sale checks"
+
+  variables:
+    # Target the iPhone (usually highest demand)
+    hotProduct: 1  # iPhone 15 Pro from our seed data
+    
+scenarios:
+  # 95% of users target the hot product
+  - name: "Hot Product Rush - iPhone"
+    weight: 95
+    flow:
+      # No inventory check - users go straight for the kill
+      - post:
+          url: "/api/v1/orders"
+          json:
+            productId: "{{ hotProduct }}"
+            userId: "rush_{{ $randomString() }}_{{ $timestamp }}_{{ $randomInt(1, 10000) }}"
+            quantity: 1
+          capture:
+            - json: "$.orderId"
+              as: orderId
+            - json: "$.jobId" 
+              as: jobId
+            - statusCode: 
+              as: orderStatus
+          expect:
+            - statusCode: [201, 400, 409, 422, 429, 500]
+      
+      # Only check status if order was accepted
+      - get:
+          url: "/api/v1/orders/{{ orderId }}"
+          ifTrue: "orderId"
+          capture:
+            - json: "$.status"
+              as: finalStatus
+
+  # 5% check other products when main one fails
+  - name: "Fallback Product Attempts" 
+    weight: 5
+    flow:
+      # Try the hot product first
+      - post:
+          url: "/api/v1/orders"
+          json:
+            productId: "{{ hotProduct }}"
+            userId: "fallback_{{ $randomString() }}"
+            quantity: 1
+          capture:
+            - statusCode:
+              as: firstAttempt
+          expect:
+            - statusCode: [201, 400, 409, 422]
+      
+      # If failed (not 201), try alternative products
+      - post:
+          url: "/api/v1/orders" 
+          json:
+            productId: "{{ $randomInt(2, 5) }}"  # Try other flash sale products
+            userId: "fallback_{{ $randomString() }}"
+            quantity: 1
+          ifTrue: "firstAttempt != 201"
+          expect:
+            - statusCode: [201, 400, 409, 422]
+
+plugins:
+  expect: {}
+  hdrhistogram: {}
+  metrics-by-endpoint:
+    useOnlyRequestNames: true
+
+# Extreme load expectations
+expectations:
+  # Under extreme load, response times will be higher
+  - http.response_time.p99: 10000   # 10 second max
+  - http.response_time.p95: 5000    # 5 second 95th percentile
+  - http.response_time.p90: 3000    # 3 second 90th percentile
+  
+  # Very low success rate expected (limited stock)
+  - http.codes.201: 2               # Only ~2% successful (50 items / 2000+ attempts)
+  - http.codes.400: 70              # Majority get stock exhausted
+  - http.codes.409: 15              # Race conditions
+  - http.codes.422: 10              # Validation errors
+  - http.codes.429: 2               # Rate limiting kicks in
+  - http.codes.500: 0               # System should not crash
+
+# Performance tracking
+before:
+  flow:
+    - log: "🔥 STARTING EXTREME FLASH SALE TEST 🔥"
+    - log: "Target: {{ hotProduct }} (iPhone 15 Pro)"
+    - log: "Expected: ~50 successful orders from 2000+ attempts"
+
+after:
+  flow:
+    - log: "🏁 Flash sale simulation complete"
+    - get:
+        url: "/api/v1/inventory/{{ hotProduct }}"
+    - get:  
+        url: "/api/v1/monitoring/metrics"

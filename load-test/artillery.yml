@@ -1,0 +1,150 @@
+config:
+  target: 'http://localhost:3001'  # Updated to correct port
+  phases:
+    # Pre-flash sale warm up
+    - duration: 10
+      arrivalRate: 2
+      name: "Pre-sale warm up"
+    # Flash sale announcement - users start checking
+    - duration: 15
+      arrivalRate: 5
+      rampTo: 20
+      name: "Flash sale announced"
+    # FLASH SALE SPIKE - Simulate 1000 users hitting at once
+    - duration: 30
+      arrivalRate: 200
+      name: "Flash sale spike - High contention"
+    # Sustained high load as users keep trying
+    - duration: 45
+      arrivalRate: 150
+      name: "Sustained contention"
+    # Gradual decline as stock runs out
+    - duration: 30
+      arrivalRate: 100
+      rampTo: 20
+      name: "Stock depletion phase"
+  
+  # Limited stock scenario - focus on flash sale items
+  variables:
+    flashSaleProducts: [1, 2, 3, 5]  # Products with flashSaleActive = true
+    # Generate large pool of unique users for realistic contention
+    userPool: 
+      - "flash_user_{{ $randomString() }}"
+
+scenarios:
+  # Main flash sale scenario - Multiple users competing for limited stock
+  - name: "Flash Sale Contention - Single Product Focus"
+    weight: 70
+    flow:
+      # Quick inventory check to see available stock
+      - get:
+          url: "/api/v1/inventory"
+          capture:
+            # Find first flash sale product with stock > 0
+            - json: "$[?(@.flashSaleActive == true && @.currentStock > 0)].id"
+              as: targetProductId
+            - json: "$[?(@.flashSaleActive == true && @.currentStock > 0)].currentStock"
+              as: availableStock
+            - json: "$[?(@.flashSaleActive == true && @.currentStock > 0)].name"
+              as: productName
+      
+      # Minimal think time - users act fast in flash sales!
+      - think: 0.1
+      
+      # Attempt to place order immediately
+      - post:
+          url: "/api/v1/orders"
+          json:
+            productId: "{{ targetProductId[0] }}"
+            userId: "flash_user_{{ $randomString() }}_{{ $timestamp }}"
+            quantity: 1  # Single item to maximize contention
+          capture:
+            - json: "$.jobId"
+              as: jobId
+            - json: "$.orderId"  
+              as: orderId
+            - json: "$.message"
+              as: responseMessage
+          expect:
+            - statusCode: [201, 400, 409, 422]  # Success, stock out, conflict, validation error
+      
+      # Quick status check if order was queued
+      - get:
+          url: "/api/v1/orders/queue/{{ jobId }}"
+          ifTrue: "jobId"
+      
+      # Check final order status
+      - get:
+          url: "/api/v1/orders/{{ orderId }}"
+          ifTrue: "orderId"
+
+  # Aggressive retry scenario - users who got denied keep trying
+  - name: "Desperate Retry Attempts"
+    weight: 20
+    flow:
+      # Multiple rapid attempts on flash sale products
+      - loop:
+        - post:
+            url: "/api/v1/orders"
+            json:
+              productId: "{{ $pick(flashSaleProducts) }}"
+              userId: "retry_user_{{ $randomString() }}"
+              quantity: 1
+            expect:
+              - statusCode: [201, 400, 409, 422]
+        - think: 0.2  # Very short delay between retries
+        count: 3  # Try 3 times rapidly
+
+  # Inventory monitoring - users refreshing to see stock levels
+  - name: "Stock Level Monitoring"
+    weight: 8
+    flow:
+      # Rapid inventory checks
+      - loop:
+        - get:
+            url: "/api/v1/inventory"
+        - think: 0.5  # Quick refresh
+        count: 5
+
+  # System monitoring during flash sale
+  - name: "System Health Check"
+    weight: 2
+    flow:
+      - get:
+          url: "/api/v1/monitoring/metrics"
+
+plugins:
+  expect: {}
+  metrics-by-endpoint: {}
+  publish-metrics:
+    - type: datadog
+      tags:
+        - "flash-sale:test"
+        - "environment:load-test"
+  hdrhistogram: {}
+
+# Flash sale specific expectations
+expectations:
+  # Performance under extreme load
+  - http.response_time.p99: 5000   # Allow higher latency under extreme load
+  - http.response_time.p95: 2000   # 95% under 2 seconds
+  - http.response_time.p50: 1000   # Median under 1 second
+  
+  # Success rate expectations for flash sale scenario
+  - http.codes.201: 5              # Only ~5% should successfully place orders (limited stock)
+  - http.codes.400: 60             # ~60% will get "insufficient stock" errors
+  - http.codes.409: 20             # ~20% will hit conflicts/race conditions
+  - http.codes.422: 10             # ~10% validation errors
+  - http.codes.500: 0              # No server errors allowed
+  
+  # System should stay responsive
+  - vusers.session_length: 10000   # Max session length
+
+# Custom metrics for flash sale analysis
+metrics:
+  - name: "flash_sale_success_rate"
+    expression: "http.codes.201 / http.requests"
+  - name: "stock_exhaustion_rate" 
+    expression: "http.codes.400 / http.requests"
+  - name: "system_saturation"
+    expression: "http.response_time.mean"

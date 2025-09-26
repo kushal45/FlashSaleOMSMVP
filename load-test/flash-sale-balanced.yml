@@ -1,0 +1,115 @@
+config:
+  target: 'http://localhost:3001'
+  phases:
+    # Pre-sale period: Users browsing and preparing
+    - duration: 10
+      arrivalRate: 10
+      name: "Pre-sale positioning"
+    # Flash sale opens: Immediate rush
+    - duration: 20
+      arrivalRate: 100
+      name: "Flash sale opens - RUSH!"
+    # Sustained high demand
+    - duration: 30
+      arrivalRate: 50
+      name: "Sustained demand"
+    # Cooldown period
+    - duration: 15
+      arrivalRate: 10
+      name: "Post-sale checks"
+
+  # Enhanced plugins for better monitoring
+  plugins:
+    hdrhistogram: {}
+    metrics-by-endpoint:
+      useOnlyRequestNames: true
+    publish-metrics:
+      - type: prometheus
+        target: 'localhost:9090'
+        prefix: 'artillery_'
+
+  variables:
+    # Target multiple products to reduce single-point contention
+    iphoneId: 1
+    samsungId: 2
+    macbookId: 3
+    watchId: 5
+    
+scenarios:
+  # 60% target iPhone (highest demand)
+  - name: "iPhone 15 Pro Rush"
+    weight: 60
+    flow:
+      - post:
+          url: "/api/v1/orders"
+          json:
+            productId: "{{ iphoneId }}"
+            userId: "iphone_{{ $randomString() }}_{{ $timestamp }}"
+            quantity: 1
+          capture:
+            - json: "$.orderId"
+              as: "orderId"
+            - json: "$.status"
+              as: "orderStatus"
+          expect:
+            - statusCode: [200, 201, 400, 429]
+
+  # 25% target Samsung (medium demand)  
+  - name: "Samsung Galaxy S24 Rush"
+    weight: 25
+    flow:
+      - post:
+          url: "/api/v1/orders"
+          json:
+            productId: "{{ samsungId }}"
+            userId: "samsung_{{ $randomString() }}_{{ $timestamp }}"
+            quantity: 1
+          capture:
+            - json: "$.orderId"
+              as: "orderId"
+          expect:
+            - statusCode: [200, 201, 400, 429]
+
+  # 10% target MacBook (lower but valuable)
+  - name: "MacBook Air M3 Rush"
+    weight: 10
+    flow:
+      - post:
+          url: "/api/v1/orders"
+          json:
+            productId: "{{ macbookId }}"
+            userId: "macbook_{{ $randomString() }}_{{ $timestamp }}"
+            quantity: 1
+          expect:
+            - statusCode: [200, 201, 400, 429]
+
+  # 5% target Apple Watch
+  - name: "Apple Watch Series 9 Rush"
+    weight: 5
+    flow:
+      - post:
+          url: "/api/v1/orders"
+          json:
+            productId: "{{ watchId }}"
+            userId: "watch_{{ $randomString() }}_{{ $timestamp }}"
+            quantity: 1
+          expect:
+            - statusCode: [200, 201, 400, 429]
+
+  # Post-processing: Check inventory status
+  - name: "Inventory Status Check"
+    weight: 10
+    flow:
+      - get:
+          url: "/api/v1/inventory"
+          expect:
+            - statusCode: 200
+          capture:
+            - json: "$[0].currentStock"
+              as: "iphoneStock"
+      # Brief pause then check again
+      - think: 2
+      - get:
+          url: "/api/v1/inventory/{{ iphoneId }}"
+          expect:
+            - statusCode: 200

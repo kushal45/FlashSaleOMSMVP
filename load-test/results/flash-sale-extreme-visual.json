@@ -1,0 +1,867 @@
+{
+  "aggregate": {
+    "counters": {
+      "vusers.created_by_name.Hot Product Rush - iPhone": 13083,
+      "vusers.created": 13800,
+      "http.requests": 13800,
+      "http.codes.400": 1000,
+      "http.responses": 13521,
+      "http.downloaded_bytes": 929633,
+      "plugins.metrics-by-endpoint./api/v1/orders.codes.400": 1000,
+      "errors.Failed capture or match": 13521,
+      "vusers.failed": 13800,
+      "vusers.created_by_name.Fallback Product Attempts": 717,
+      "http.codes.429": 12521,
+      "plugins.metrics-by-endpoint./api/v1/orders.codes.429": 12521,
+      "plugins.metrics-by-endpoint./api/v1/orders.errors.ECONNREFUSED": 279,
+      "errors.ECONNREFUSED": 279
+    },
+    "rates": {
+      "http.request_rate": 203
+    },
+    "firstCounterAt": 1758874836513,
+    "firstHistogramAt": 1758874836549,
+    "lastCounterAt": 1758874896328,
+    "lastHistogramAt": 1758874890642,
+    "firstMetricAt": 1758874836513,
+    "lastMetricAt": 1758874896328,
+    "period": 1758874890000,
+    "summaries": {
+      "http.response_time": {
+        "min": 0,
+        "max": 22,
+        "count": 13521,
+        "mean": 0.4,
+        "p50": 0,
+        "median": 0,
+        "p75": 1,
+        "p90": 1,
+        "p95": 1,
+        "p99": 3,
+        "p999": 16
+      },
+      "http.response_time.4xx": {
+        "min": 0,
+        "max": 22,
+        "count": 13521,
+        "mean": 0.4,
+        "p50": 0,
+        "median": 0,
+        "p75": 1,
+        "p90": 1,
+        "p95": 1,
+        "p99": 3,
+        "p999": 16
+      },
+      "plugins.metrics-by-endpoint.response_time./api/v1/orders": {
+        "min": 0,
+        "max": 22,
+        "count": 13521,
+        "mean": 0.4,
+        "p50": 0,
+        "median": 0,
+        "p75": 1,
+        "p90": 1,
+        "p95": 1,
+        "p99": 3,
+        "p999": 16
+      }
+    },
+    "histograms": {
+      "http.response_time": {
+        "min": 0,
+        "max": 22,
+        "count": 13521,
+        "mean": 0.4,
+        "p50": 0,
+        "median": 0,
+        "p75": 1,
+        "p90": 1,
+        "p95": 1,
+        "p99": 3,
+        "p999": 16
+      },
+      "http.response_time.4xx": {
+        "min": 0,
+        "max": 22,
+        "count": 13521,
+        "mean": 0.4,
+        "p50": 0,
+        "median": 0,
+        "p75": 1,
+        "p90": 1,
+        "p95": 1,
+        "p99": 3,
+        "p999": 16
+      },
+      "plugins.metrics-by-endpoint.response_time./api/v1/orders": {
+        "min": 0,
+        "max": 22,
+        "count": 13521,
+        "mean": 0.4,
+        "p50": 0,
+        "median": 0,
+        "p75": 1,
+        "p90": 1,
+        "p95": 1,
+        "p99": 3,
+        "p999": 16
+      }
+    }
+  },
+  "intermediate": [
+    {
+      "counters": {
+        "vusers.created_by_name.Hot Product Rush - iPhone": 30,
+        "vusers.created": 33,
+        "http.requests": 33,
+        "http.codes.400": 33,
+        "http.responses": 33,
+        "http.downloaded_bytes": 2589,
+        "plugins.metrics-by-endpoint./api/v1/orders.codes.400": 33,
+        "errors.Failed capture or match": 33,
+        "vusers.failed": 33,
+        "vusers.created_by_name.Fallback Product Attempts": 3
+      },
+      "rates": {
+        "http.request_rate": 14
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1758874836513,
+      "firstHistogramAt": 1758874836549,
+      "lastCounterAt": 1758874839617,
+      "lastHistogramAt": 1758874839617,
+      "firstMetricAt": 1758874836513,
+      "lastMetricAt": 1758874839617,
+      "period": "1758874830000",
+      "summaries": {
+        "http.response_time": {
+          "min": 0,
+          "max": 17,
+          "count": 33,
+          "mean": 2.1,
+          "p50": 1,
+          "median": 1,
+          "p75": 2,
+          "p90": 2,
+          "p95": 4,
+          "p99": 13.1,
+          "p999": 13.1
+        },
+        "http.response_time.4xx": {
+          "min": 0,
+          "max": 17,
+          "count": 33,
+          "mean": 2.1,
+          "p50": 1,
+          "median": 1,
+          "p75": 2,
+          "p90": 2,
+          "p95": 4,
+          "p99": 13.1,
+          "p999": 13.1
+        },
+        "plugins.metrics-by-endpoint.response_time./api/v1/orders": {
+          "min": 0,
+          "max": 17,
+          "count": 33,
+          "mean": 2.1,
+          "p50": 1,
+          "median": 1,
+          "p75": 2,
+          "p90": 2,
+          "p95": 4,
+          "p99": 13.1,
+          "p999": 13.1
+        }
+      },
+      "histograms": {
+        "http.response_time": {
+          "min": 0,
+          "max": 17,
+          "count": 33,
+          "mean": 2.1,
+          "p50": 1,
+          "median": 1,
+          "p75": 2,
+          "p90": 2,
+          "p95": 4,
+          "p99": 13.1,
+          "p999": 13.1
+        },
+        "http.response_time.4xx": {
+          "min": 0,
+          "max": 17,
+          "count": 33,
+          "mean": 2.1,
+          "p50": 1,
+          "median": 1,
+          "p75": 2,
+          "p90": 2,
+          "p95": 4,
+          "p99": 13.1,
+          "p999": 13.1
+        },
+        "plugins.metrics-by-endpoint.response_time./api/v1/orders": {
+          "min": 0,
+          "max": 17,
+          "count": 33,
+          "mean": 2.1,
+          "p50": 1,
+          "median": 1,
+          "p75": 2,
+          "p90": 2,
+          "p95": 4,
+          "p99": 13.1,
+          "p999": 13.1
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Hot Product Rush - iPhone": 4213,
+        "vusers.created": 4429,
+        "http.requests": 4429,
+        "http.codes.400": 967,
+        "http.responses": 4428,
+        "http.downloaded_bytes": 310964,
+        "plugins.metrics-by-endpoint./api/v1/orders.codes.400": 967,
+        "errors.Failed capture or match": 4428,
+        "vusers.failed": 4428,
+        "vusers.created_by_name.Fallback Product Attempts": 216,
+        "http.codes.429": 3461,
+        "plugins.metrics-by-endpoint./api/v1/orders.codes.429": 3461
+      },
+      "rates": {
+        "http.request_rate": 451
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1758874840012,
+      "firstHistogramAt": 1758874840017,
+      "lastCounterAt": 1758874849999,
+      "lastHistogramAt": 1758874849997,
+      "firstMetricAt": 1758874840012,
+      "lastMetricAt": 1758874849999,
+      "period": "1758874840000",
+      "summaries": {
+        "http.response_time": {
+          "min": 0,
+          "max": 22,
+          "count": 4428,
+          "mean": 0.6,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 2,
+          "p99": 4,
+          "p999": 22
+        },
+        "http.response_time.4xx": {
+          "min": 0,
+          "max": 22,
+          "count": 4428,
+          "mean": 0.6,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 2,
+          "p99": 4,
+          "p999": 22
+        },
+        "plugins.metrics-by-endpoint.response_time./api/v1/orders": {
+          "min": 0,
+          "max": 22,
+          "count": 4428,
+          "mean": 0.6,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 2,
+          "p99": 4,
+          "p999": 22
+        }
+      },
+      "histograms": {
+        "http.response_time": {
+          "min": 0,
+          "max": 22,
+          "count": 4428,
+          "mean": 0.6,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 2,
+          "p99": 4,
+          "p999": 22
+        },
+        "http.response_time.4xx": {
+          "min": 0,
+          "max": 22,
+          "count": 4428,
+          "mean": 0.6,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 2,
+          "p99": 4,
+          "p999": 22
+        },
+        "plugins.metrics-by-endpoint.response_time./api/v1/orders": {
+          "min": 0,
+          "max": 22,
+          "count": 4428,
+          "mean": 0.6,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 2,
+          "p99": 4,
+          "p999": 22
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Hot Product Rush - iPhone": 3058,
+        "vusers.created": 3234,
+        "http.requests": 3234,
+        "http.codes.429": 3235,
+        "http.responses": 3235,
+        "http.downloaded_bytes": 219980,
+        "plugins.metrics-by-endpoint./api/v1/orders.codes.429": 3235,
+        "errors.Failed capture or match": 3235,
+        "vusers.failed": 3235,
+        "vusers.created_by_name.Fallback Product Attempts": 176
+      },
+      "rates": {
+        "http.request_rate": 323
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1758874850000,
+      "firstHistogramAt": 1758874850000,
+      "lastCounterAt": 1758874859997,
+      "lastHistogramAt": 1758874859997,
+      "firstMetricAt": 1758874850000,
+      "lastMetricAt": 1758874859997,
+      "period": "1758874850000",
+      "summaries": {
+        "http.response_time": {
+          "min": 0,
+          "max": 14,
+          "count": 3235,
+          "mean": 0.3,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 6
+        },
+        "http.response_time.4xx": {
+          "min": 0,
+          "max": 14,
+          "count": 3235,
+          "mean": 0.3,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 6
+        },
+        "plugins.metrics-by-endpoint.response_time./api/v1/orders": {
+          "min": 0,
+          "max": 14,
+          "count": 3235,
+          "mean": 0.3,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 6
+        }
+      },
+      "histograms": {
+        "http.response_time": {
+          "min": 0,
+          "max": 14,
+          "count": 3235,
+          "mean": 0.3,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 6
+        },
+        "http.response_time.4xx": {
+          "min": 0,
+          "max": 14,
+          "count": 3235,
+          "mean": 0.3,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 6
+        },
+        "plugins.metrics-by-endpoint.response_time./api/v1/orders": {
+          "min": 0,
+          "max": 14,
+          "count": 3235,
+          "mean": 0.3,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 6
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Hot Product Rush - iPhone": 2855,
+        "vusers.created": 3000,
+        "http.requests": 3000,
+        "http.codes.429": 3000,
+        "http.responses": 3000,
+        "http.downloaded_bytes": 204000,
+        "plugins.metrics-by-endpoint./api/v1/orders.codes.429": 3000,
+        "errors.Failed capture or match": 3000,
+        "vusers.failed": 3000,
+        "vusers.created_by_name.Fallback Product Attempts": 145
+      },
+      "rates": {
+        "http.request_rate": 300
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1758874860001,
+      "firstHistogramAt": 1758874860002,
+      "lastCounterAt": 1758874869997,
+      "lastHistogramAt": 1758874869997,
+      "firstMetricAt": 1758874860001,
+      "lastMetricAt": 1758874869997,
+      "period": "1758874860000",
+      "summaries": {
+        "http.response_time": {
+          "min": 0,
+          "max": 13,
+          "count": 3000,
+          "mean": 0.2,
+          "p50": 0,
+          "median": 0,
+          "p75": 0,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 3
+        },
+        "http.response_time.4xx": {
+          "min": 0,
+          "max": 13,
+          "count": 3000,
+          "mean": 0.2,
+          "p50": 0,
+          "median": 0,
+          "p75": 0,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 3
+        },
+        "plugins.metrics-by-endpoint.response_time./api/v1/orders": {
+          "min": 0,
+          "max": 13,
+          "count": 3000,
+          "mean": 0.2,
+          "p50": 0,
+          "median": 0,
+          "p75": 0,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 3
+        }
+      },
+      "histograms": {
+        "http.response_time": {
+          "min": 0,
+          "max": 13,
+          "count": 3000,
+          "mean": 0.2,
+          "p50": 0,
+          "median": 0,
+          "p75": 0,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 3
+        },
+        "http.response_time.4xx": {
+          "min": 0,
+          "max": 13,
+          "count": 3000,
+          "mean": 0.2,
+          "p50": 0,
+          "median": 0,
+          "p75": 0,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 3
+        },
+        "plugins.metrics-by-endpoint.response_time./api/v1/orders": {
+          "min": 0,
+          "max": 13,
+          "count": 3000,
+          "mean": 0.2,
+          "p50": 0,
+          "median": 0,
+          "p75": 0,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 3
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Hot Product Rush - iPhone": 1576,
+        "vusers.created": 1676,
+        "http.requests": 1676,
+        "http.codes.429": 1676,
+        "http.responses": 1676,
+        "http.downloaded_bytes": 113968,
+        "plugins.metrics-by-endpoint./api/v1/orders.codes.429": 1676,
+        "errors.Failed capture or match": 1676,
+        "vusers.failed": 1676,
+        "vusers.created_by_name.Fallback Product Attempts": 100
+      },
+      "rates": {
+        "http.request_rate": 168
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1758874870001,
+      "firstHistogramAt": 1758874870002,
+      "lastCounterAt": 1758874879994,
+      "lastHistogramAt": 1758874879994,
+      "firstMetricAt": 1758874870001,
+      "lastMetricAt": 1758874879994,
+      "period": "1758874870000",
+      "summaries": {
+        "http.response_time": {
+          "min": 0,
+          "max": 2,
+          "count": 1676,
+          "mean": 0.3,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 1
+        },
+        "http.response_time.4xx": {
+          "min": 0,
+          "max": 2,
+          "count": 1676,
+          "mean": 0.3,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 1
+        },
+        "plugins.metrics-by-endpoint.response_time./api/v1/orders": {
+          "min": 0,
+          "max": 2,
+          "count": 1676,
+          "mean": 0.3,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 1
+        }
+      },
+      "histograms": {
+        "http.response_time": {
+          "min": 0,
+          "max": 2,
+          "count": 1676,
+          "mean": 0.3,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 1
+        },
+        "http.response_time.4xx": {
+          "min": 0,
+          "max": 2,
+          "count": 1676,
+          "mean": 0.3,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 1
+        },
+        "plugins.metrics-by-endpoint.response_time./api/v1/orders": {
+          "min": 0,
+          "max": 2,
+          "count": 1676,
+          "mean": 0.3,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 1
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Hot Product Rush - iPhone": 1055,
+        "vusers.created": 1116,
+        "http.requests": 1116,
+        "http.codes.429": 1116,
+        "http.responses": 1116,
+        "http.downloaded_bytes": 75888,
+        "plugins.metrics-by-endpoint./api/v1/orders.codes.429": 1116,
+        "errors.Failed capture or match": 1116,
+        "vusers.failed": 1116,
+        "vusers.created_by_name.Fallback Product Attempts": 61
+      },
+      "rates": {
+        "http.request_rate": 113
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1758874880015,
+      "firstHistogramAt": 1758874880016,
+      "lastCounterAt": 1758874889991,
+      "lastHistogramAt": 1758874889991,
+      "firstMetricAt": 1758874880015,
+      "lastMetricAt": 1758874889991,
+      "period": "1758874880000",
+      "summaries": {
+        "http.response_time": {
+          "min": 0,
+          "max": 9,
+          "count": 1116,
+          "mean": 0.3,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 3
+        },
+        "http.response_time.4xx": {
+          "min": 0,
+          "max": 9,
+          "count": 1116,
+          "mean": 0.3,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 3
+        },
+        "plugins.metrics-by-endpoint.response_time./api/v1/orders": {
+          "min": 0,
+          "max": 9,
+          "count": 1116,
+          "mean": 0.3,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 3
+        }
+      },
+      "histograms": {
+        "http.response_time": {
+          "min": 0,
+          "max": 9,
+          "count": 1116,
+          "mean": 0.3,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 3
+        },
+        "http.response_time.4xx": {
+          "min": 0,
+          "max": 9,
+          "count": 1116,
+          "mean": 0.3,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 3
+        },
+        "plugins.metrics-by-endpoint.response_time./api/v1/orders": {
+          "min": 0,
+          "max": 9,
+          "count": 1116,
+          "mean": 0.3,
+          "p50": 0,
+          "median": 0,
+          "p75": 1,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 3
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.Hot Product Rush - iPhone": 296,
+        "vusers.created": 312,
+        "http.requests": 312,
+        "http.codes.429": 33,
+        "http.responses": 33,
+        "http.downloaded_bytes": 2244,
+        "plugins.metrics-by-endpoint./api/v1/orders.codes.429": 33,
+        "errors.Failed capture or match": 33,
+        "vusers.failed": 312,
+        "plugins.metrics-by-endpoint./api/v1/orders.errors.ECONNREFUSED": 279,
+        "errors.ECONNREFUSED": 279,
+        "vusers.created_by_name.Fallback Product Attempts": 16
+      },
+      "rates": {
+        "http.request_rate": 50
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1758874890015,
+      "firstHistogramAt": 1758874890017,
+      "lastCounterAt": 1758874896328,
+      "lastHistogramAt": 1758874890642,
+      "firstMetricAt": 1758874890015,
+      "lastMetricAt": 1758874896328,
+      "period": "1758874890000",
+      "summaries": {
+        "http.response_time": {
+          "min": 0,
+          "max": 1,
+          "count": 33,
+          "mean": 0.2,
+          "p50": 0,
+          "median": 0,
+          "p75": 0,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 1
+        },
+        "http.response_time.4xx": {
+          "min": 0,
+          "max": 1,
+          "count": 33,
+          "mean": 0.2,
+          "p50": 0,
+          "median": 0,
+          "p75": 0,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 1
+        },
+        "plugins.metrics-by-endpoint.response_time./api/v1/orders": {
+          "min": 0,
+          "max": 1,
+          "count": 33,
+          "mean": 0.2,
+          "p50": 0,
+          "median": 0,
+          "p75": 0,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 1
+        }
+      },
+      "histograms": {
+        "http.response_time": {
+          "min": 0,
+          "max": 1,
+          "count": 33,
+          "mean": 0.2,
+          "p50": 0,
+          "median": 0,
+          "p75": 0,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 1
+        },
+        "http.response_time.4xx": {
+          "min": 0,
+          "max": 1,
+          "count": 33,
+          "mean": 0.2,
+          "p50": 0,
+          "median": 0,
+          "p75": 0,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 1
+        },
+        "plugins.metrics-by-endpoint.response_time./api/v1/orders": {
+          "min": 0,
+          "max": 1,
+          "count": 33,
+          "mean": 0.2,
+          "p50": 0,
+          "median": 0,
+          "p75": 0,
+          "p90": 1,
+          "p95": 1,
+          "p99": 1,
+          "p999": 1
+        }
+      }
+    }
+  ]
+}
