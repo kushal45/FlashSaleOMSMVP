@@ -22,6 +22,44 @@ A high-performance, scalable backend system for handling flash sales with real-t
                 └─────────────┘                  └─────────────┘
 ```
 
+## 🔒 Redis Red-lock Implementation
+
+This project implements distributed locking using the **Red-lock algorithm** with 3 Redis nodes for high-concurrency flash sale scenarios. This ensures data consistency and prevents race conditions during inventory management.
+
+### Red-lock Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Flash Sale Backend                      │
+├─────────────────────────────────────────────────────────────┤
+│  RedlockService (Distributed Locking)                      │
+│  ├── Redis Node 1 (localhost:6379)                         │
+│  ├── Redis Node 2 (localhost:6380)                         │
+│  └── Redis Node 3 (localhost:6381)                         │
+├─────────────────────────────────────────────────────────────┤
+│  OrdersService → uses RedlockService.withLock()             │
+│  OrderProcessor → processes orders within lock context      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Key Red-lock Features
+
+- **Fault Tolerant**: Can handle 1 Redis node failure out of 3
+- **Race Condition Prevention**: Ensures atomic operations during high concurrency
+- **Automatic Lock Management**: Uses `withLock()` pattern for automatic release
+- **Configurable TTL**: Lock expiration prevents deadlocks
+- **Monitoring Ready**: Integrated with metrics and logging
+
+### Redis Infrastructure
+
+The project uses multiple Redis instances:
+
+- **Redis Node 1** (port 6379): Primary Red-lock node
+- **Redis Node 2** (port 6380): Secondary Red-lock node  
+- **Redis Node 3** (port 6381): Tertiary Red-lock node
+- **Main Redis** (port 6382): Application caching and sessions
+- **Redis Sentinel** (port 26379): High availability monitoring
+
 ## 📋 Prerequisites
 
 - Node.js (v18+)

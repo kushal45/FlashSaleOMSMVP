@@ -6,9 +6,9 @@ import { OrdersService } from './orders.service';
 import { OrderProcessor } from './orders.processor';
 import { Order, Product } from '../../database/entities';
 import { InventoryModule } from '../inventory/inventory.module';
-import { RedisModule } from '../../common/redis/redis.module';
 import { ConfigModule } from '@nestjs/config';
 import { MetricsModule } from 'src/common/metrics/metrics.module';
+import { RedisModule } from 'src/common/redis/redis.module';
 
 @Module({
   imports: [
@@ -21,8 +21,8 @@ import { MetricsModule } from 'src/common/metrics/metrics.module';
       name: 'order-processing',
     }),
     InventoryModule,
-    RedisModule,
     MetricsModule,
+    RedisModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService, OrderProcessor],

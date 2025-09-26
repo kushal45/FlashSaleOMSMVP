@@ -5,7 +5,7 @@ import { Repository, DataSource } from 'typeorm';
 import { Job } from 'bullmq';
 import { Order, OrderStatus } from '../../database/entities';
 import { InventoryService } from '../inventory/inventory.service';
-import { RedisClientProvider } from 'src/common/redis/redis-client.provider';
+import { RedlockService } from '../../common/redis/redlock.service';
 import { OrderQueueJobData } from './interfaces/orders.interface';
 
 @Injectable()
@@ -18,18 +18,36 @@ export class OrderProcessor extends WorkerHost {
     private readonly orderRepository: Repository<Order>,
     private readonly inventoryService: InventoryService,
     private readonly dataSource: DataSource,
-    private readonly redisClientProvider: RedisClientProvider,
+    private readonly redlockService: RedlockService,
   ) {
     super();
   }
 
   async process(job: Job<any, any, string>): Promise<any> {
-    const { orderId, productId, quantity, currentStock } =
+    const { orderId, productId, quantity, lockKey, lockTTL } =
       job.data as OrderQueueJobData;
 
     this.logger.log(
       `Processing order ${orderId} for product ${productId}, quantity: ${quantity}`,
     );
+
+    /**
+     * Best Practice: Re-acquire lock in worker for inventory operations
+     * This ensures that inventory updates are atomic and prevent overselling
+     * even if multiple workers are processing orders for the same product
+     */
+    const numericLockTTL =
+      typeof lockTTL === 'string' ? parseInt(lockTTL, 10) : lockTTL;
+    const lock = await this.redlockService.acquireLock(lockKey, numericLockTTL);
+    if (!lock) {
+      this.logger.warn(
+        `Could not acquire lock for product ${productId} in worker`,
+      );
+      await this.orderRepository.update(orderId, {
+        status: OrderStatus.FAILED,
+      });
+      return { success: false, reason: 'Lock acquisition failed in worker' };
+    }
 
     // Use database transaction for atomicity
     const queryRunner = this.dataSource.createQueryRunner();
@@ -41,7 +59,8 @@ export class OrderProcessor extends WorkerHost {
       await queryRunner.manager.update(Order, orderId, {
         status: OrderStatus.PROCESSING,
       });
-      // Check and reserve inventory atomically
+      
+      // Check and reserve inventory atomically with lock protection
       const reservationSuccess = await this.inventoryService.reserveInventory(
         productId,
         quantity,
@@ -56,7 +75,9 @@ export class OrderProcessor extends WorkerHost {
 
         await queryRunner.commitTransaction();
         this.logger.warn(`Order ${orderId} failed - insufficient inventory`);
-
+        
+        // Release lock on failure
+        await this.redlockService.releaseLock(lock);
         return { success: false, reason: 'Insufficient inventory' };
       }
 
@@ -67,12 +88,11 @@ export class OrderProcessor extends WorkerHost {
         expiresAt: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes to complete
       });
 
-      // Define lockKey before releasing the lock
-      const lockKey = `lock:product:${productId}:stock:${currentStock}`;
-      await this.redisClientProvider.releaseLock(lockKey);
       await queryRunner.commitTransaction();
       this.logger.log(`Order ${orderId} confirmed successfully`);
 
+      // Release lock on success
+      await this.redlockService.releaseLock(lock);
       return { success: true, orderId };
     } catch (error) {
       await queryRunner.rollbackTransaction();
@@ -82,7 +102,12 @@ export class OrderProcessor extends WorkerHost {
         status: OrderStatus.FAILED,
       });
 
-      this.logger.error(`Order ${orderId} processing failed: ${error.message}`);
+      // Always release lock on error
+      await this.redlockService.releaseLock(lock);
+      this.logger.error(
+        `Order ${orderId} processing failed:`,
+        (error as Error)?.message || 'Unknown error',
+      );
       throw error;
     } finally {
       await queryRunner.release();

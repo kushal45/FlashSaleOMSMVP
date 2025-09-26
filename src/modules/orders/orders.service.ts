@@ -4,12 +4,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { InjectQueue } from '@nestjs/bullmq';
+import { InjectQueue, Processor } from '@nestjs/bullmq';
 import { Repository } from 'typeorm';
 import { Queue } from 'bullmq';
 import { Order, OrderStatus, Product } from '../../database/entities';
 import { CreateOrderDto, OrderResponseDto } from './dto/create-order.dto';
-import { RedisClientProvider } from 'src/common/redis/redis-client.provider';
+import { RedlockService } from '../../common/redis/redlock.service';
 import {
   OrderMetrics,
   OrderQueueJobData,
@@ -27,7 +27,7 @@ export class OrdersService {
     private readonly productRepository: Repository<Product>,
     @InjectQueue('order-processing')
     private readonly orderQueue: Queue,
-    private readonly redisClientProvider: RedisClientProvider,
+    private readonly redlockService: RedlockService,
     private readonly configService: ConfigService,
     private readonly metricsService: MetricsService,
   ) {}
@@ -55,14 +55,28 @@ export class OrdersService {
       }
 
       /**
-       * logic to check also if stock is available
-       * then we atomically perform the lock with redis-lock to ensure atomicity and avoid race conditions
-       * this avoids overselling of products during high concurrency flash sale events
+       * Best Practice: Two-Phase Locking for Overselling Prevention
+       * 1. Acquire lock here to check stock availability atomically
+       * 2. If stock is available, create order and queue for processing
+       * 3. Worker will re-acquire the same lock before inventory operations
+       * 4. This ensures maximum accuracy in preventing overselling
        */
       const currentStock = product.currentStock;
-      const lockKey = `lock:product:${productId}:stock:${currentStock}`;
-      const lockTTL = this.configService.get<number>('LOCK_TTL') || 5000;
-      const lockAcquired = await this.redisClientProvider.aquireLock(
+
+      // Early stock check to fail fast if no stock available
+      if (currentStock < quantity) {
+        await this.metricsService.recordOrderStatus('failed');
+        throw new BadRequestException('Insufficient stock available');
+      }
+
+      const lockKey = `lock:product:${productId}`;
+      const lockTTL = parseInt(
+        this.configService.get<string>('LOCK_TTL', '10000'),
+        10,
+      ); // Ensure integer conversion
+
+      // Acquire lock to ensure atomic stock check and order creation
+      const lockAcquired = await this.redlockService.acquireLock(
         lockKey,
         lockTTL,
       );
@@ -70,6 +84,16 @@ export class OrdersService {
         // Record failed order metric
         await this.metricsService.recordOrderStatus('failed');
         throw new BadRequestException('High demand! Please try again.');
+      }
+
+      // Double-check stock under lock (race condition protection)
+      const freshProduct = await this.productRepository.findOne({
+        where: { id: productId },
+      });
+      if (!freshProduct || freshProduct.currentStock < quantity) {
+        await this.redlockService.releaseLock(lockAcquired);
+        await this.metricsService.recordOrderStatus('failed');
+        throw new BadRequestException('Insufficient stock available');
       }
 
       // Create order record
@@ -81,13 +105,19 @@ export class OrdersService {
       });
 
       const savedOrder = await this.orderRepository.save(order);
+
+      // Release the lock after order creation but before queuing
+      await this.redlockService.releaseLock(lockAcquired);
+
       const orderData = {
         orderId: savedOrder.id,
         productId,
         userId,
         quantity,
-        currentStock,
+        currentStock: freshProduct.currentStock,
         timestamp: Date.now(),
+        lockKey,
+        lockTTL,
       } as OrderQueueJobData;
       // Add to queue for processing
       const job = await this.orderQueue.add('process-order', orderData, {
@@ -130,6 +160,7 @@ export class OrdersService {
       throw error;
     }
   }
+
   async getOrderStatus(orderId: number): Promise<Order> {
     const order = await this.orderRepository.findOne({
       where: { id: orderId },

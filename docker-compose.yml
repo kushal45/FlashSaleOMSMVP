@@ -21,11 +21,58 @@ services:
     networks:
       - flash-sale-network
 
+  # Red-lock Redis Nodes
+  redis-node1:
+    image: redis:7-alpine
+    container_name: flash-sale-redis-node1
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_node1_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - flash-sale-network
+
+  redis-node2:
+    image: redis:7-alpine
+    container_name: flash-sale-redis-node2
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_node2_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - flash-sale-network
+
+  redis-node3:
+    image: redis:7-alpine
+    container_name: flash-sale-redis-node3
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis_node3_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - flash-sale-network
+
+  # Main Redis for application data (non-locking)
   redis:
     image: redis:7-alpine
     container_name: flash-sale-redis
     ports:
-      - "6379:6379"
+      - "6382:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -143,5 +190,8 @@ networks:
 volumes:
   postgres_data:
   redis_data:
+  redis_node1_data:
+  redis_node2_data:
+  redis_node3_data:
   prometheus_data:
   grafana_data:

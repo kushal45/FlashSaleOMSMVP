@@ -23,4 +23,6 @@ export interface OrderQueueJobData {
   quantity: number;
   timestamp: number;
   currentStock: number;
+  lockKey: string;
+  lockTTL: number;
 }
