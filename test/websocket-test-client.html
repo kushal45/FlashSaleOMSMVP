@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test Client</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .connected { background-color: #d4edda; color: #155724; }
+        .disconnected { background-color: #f8d7da; color: #721c24; }
+        .button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover { background-color: #0056b3; }
+        .button:disabled { 
+            background-color: #6c757d; 
+            cursor: not-allowed; 
+        }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            border-radius: 5px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 2px 0;
+        }
+        .log-received { color: #28a745; }
+        .log-sent { color: #007bff; }
+        .log-error { color: #dc3545; }
+        .log-info { color: #6c757d; }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .metric-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+        }
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .metric-label {
+            color: #6c757d;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔌 WebSocket Test Client</h1>
+        
+        <div id="connectionStatus" class="status disconnected">
+            Disconnected
+        </div>
+
+        <div>
+            <button id="connectBtn" class="button">Connect</button>
+            <button id="disconnectBtn" class="button" disabled>Disconnect</button>
+            <button id="subscribeBtn" class="button" disabled>Subscribe to Metrics</button>
+            <button id="unsubscribeBtn" class="button" disabled>Unsubscribe</button>
+        </div>
+
+        <div>
+            <h3>Custom Endpoints</h3>
+            <button id="fetchOrdersBtn" class="button" disabled>Fetch Total Orders</button>
+            <button id="fetchInventoryBtn" class="button" disabled>Fetch Inventory</button>
+            <button id="benchmarkBtn" class="button" disabled>Get Benchmark Report</button>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-value" id="totalOrders">-</div>
+                <div class="metric-label">Total Orders</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="queueLength">-</div>
+                <div class="metric-label">Queue Length</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="errorRate">-</div>
+                <div class="metric-label">Error Rate (%)</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="activeConnections">-</div>
+                <div class="metric-label">Active Connections</div>
+            </div>
+        </div>
+
+        <div>
+            <h3>Event Log</h3>
+            <button onclick="clearLog()" class="button">Clear Log</button>
+            <div id="eventLog" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        class WebSocketTester {
+            constructor() {
+                this.socket = null;
+                this.isConnected = false;
+                this.isSubscribed = false;
+                this.setupEventListeners();
+            }
+
+            setupEventListeners() {
+                document.getElementById('connectBtn').addEventListener('click', () => this.connect());
+                document.getElementById('disconnectBtn').addEventListener('click', () => this.disconnect());
+                document.getElementById('subscribeBtn').addEventListener('click', () => this.subscribe());
+                document.getElementById('unsubscribeBtn').addEventListener('click', () => this.unsubscribe());
+                document.getElementById('fetchOrdersBtn').addEventListener('click', () => this.fetchOrders());
+                document.getElementById('fetchInventoryBtn').addEventListener('click', () => this.fetchInventory());
+                document.getElementById('benchmarkBtn').addEventListener('click', () => this.getBenchmark());
+            }
+
+            connect() {
+                this.log('Connecting to WebSocket...', 'info');
+                
+                this.socket = io('http://localhost:3001', {
+                    transports: ['websocket'],
+                    timeout: 5000
+                });
+
+                this.socket.on('connect', () => {
+                    this.isConnected = true;
+                    this.updateConnectionStatus('Connected', true);
+                    this.log(`Connected with ID: ${this.socket.id}`, 'received');
+                    this.updateButtons();
+                });
+
+                this.socket.on('disconnect', (reason) => {
+                    this.isConnected = false;
+                    this.isSubscribed = false;
+                    this.updateConnectionStatus(`Disconnected: ${reason}`, false);
+                    this.log(`Disconnected: ${reason}`, 'error');
+                    this.updateButtons();
+                });
+
+                this.socket.on('connect_error', (error) => {
+                    this.log(`Connection error: ${error.message}`, 'error');
+                });
+
+                // Set up event listeners for all possible events
+                this.setupSocketListeners();
+            }
+
+            setupSocketListeners() {
+                this.socket.on('metrics-update', (data) => {
+                    this.log('Received metrics-update', 'received');
+                    this.updateMetrics(data);
+                    console.log('Metrics:', data);
+                });
+
+                this.socket.on('order-update', (data) => {
+                    this.log('Received order-update', 'received');
+                    console.log('Order update:', data);
+                });
+
+                this.socket.on('inventory-update', (data) => {
+                    this.log('Received inventory-update', 'received');
+                    console.log('Inventory update:', data);
+                });
+
+                this.socket.on('fetch-total-orders', (data) => {
+                    this.log(`Received fetch-total-orders: ${data.totalOrders}`, 'received');
+                    document.getElementById('totalOrders').textContent = data.totalOrders;
+                });
+
+                this.socket.on('fetch-inventory-updates', (data) => {
+                    this.log(`Received fetch-inventory-updates: ${data.products?.length || 0} products`, 'received');
+                    console.log('Inventory data:', data);
+                });
+
+                this.socket.on('benchmark-report', (data) => {
+                    this.log('Received benchmark-report', 'received');
+                    console.log('Benchmark:', data);
+                });
+
+                this.socket.on('benchmark-error', (error) => {
+                    this.log(`Benchmark error: ${error.message}`, 'error');
+                });
+            }
+
+            disconnect() {
+                if (this.socket) {
+                    this.socket.disconnect();
+                }
+            }
+
+            subscribe() {
+                if (this.socket && this.isConnected) {
+                    this.socket.emit('subscribe-metrics');
+                    this.isSubscribed = true;
+                    this.log('Sent subscribe-metrics', 'sent');
+                    this.updateButtons();
+                }
+            }
+
+            unsubscribe() {
+                if (this.socket && this.isConnected) {
+                    this.socket.emit('unsubscribe-metrics');
+                    this.isSubscribed = false;
+                    this.log('Sent unsubscribe-metrics', 'sent');
+                    this.updateButtons();
+                }
+            }
+
+            fetchOrders() {
+                if (this.socket && this.isConnected) {
+                    this.socket.emit('fetch-total-orders');
+                    this.log('Sent fetch-total-orders', 'sent');
+                }
+            }
+
+            fetchInventory() {
+                if (this.socket && this.isConnected) {
+                    this.socket.emit('fetch-inventory-updates');
+                    this.log('Sent fetch-inventory-updates', 'sent');
+                }
+            }
+
+            getBenchmark() {
+                if (this.socket && this.isConnected) {
+                    this.socket.emit('get-benchmark-report');
+                    this.log('Sent get-benchmark-report', 'sent');
+                }
+            }
+
+            updateConnectionStatus(message, connected) {
+                const statusEl = document.getElementById('connectionStatus');
+                statusEl.textContent = message;
+                statusEl.className = `status ${connected ? 'connected' : 'disconnected'}`;
+            }
+
+            updateButtons() {
+                document.getElementById('connectBtn').disabled = this.isConnected;
+                document.getElementById('disconnectBtn').disabled = !this.isConnected;
+                document.getElementById('subscribeBtn').disabled = !this.isConnected || this.isSubscribed;
+                document.getElementById('unsubscribeBtn').disabled = !this.isConnected || !this.isSubscribed;
+                document.getElementById('fetchOrdersBtn').disabled = !this.isConnected;
+                document.getElementById('fetchInventoryBtn').disabled = !this.isConnected;
+                document.getElementById('benchmarkBtn').disabled = !this.isConnected;
+            }
+
+            updateMetrics(data) {
+                document.getElementById('totalOrders').textContent = 
+                    (data.successfulOrders || 0) + (data.failedOrders || 0) + (data.pendingOrders || 0);
+                document.getElementById('queueLength').textContent = data.queueLength || 0;
+                document.getElementById('errorRate').textContent = (data.errorRate || 0).toFixed(1);
+                document.getElementById('activeConnections').textContent = data.activeConnections || 0;
+            }
+
+            log(message, type = 'info') {
+                const logEl = document.getElementById('eventLog');
+                const entry = document.createElement('div');
+                entry.className = `log-entry log-${type}`;
+                entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+                logEl.appendChild(entry);
+                logEl.scrollTop = logEl.scrollHeight;
+            }
+        }
+
+        function clearLog() {
+            document.getElementById('eventLog').innerHTML = '';
+        }
+
+        // Initialize the tester
+        const tester = new WebSocketTester();
+    </script>
+</body>
+</html>

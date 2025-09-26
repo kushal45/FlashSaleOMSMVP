@@ -1,3 +1,4 @@
+// ...existing imports and class definition...
 import {
   WebSocketGateway,
   WebSocketServer,
@@ -59,6 +60,25 @@ export class MonitoringGateway
     );
   }
 
+  @SubscribeMessage('fetch-total-orders')
+  async handleFetchTotalOrders(
+    @ConnectedSocket() client: Socket,
+  ): Promise<void> {
+    const metrics = await this.metricsService.getMetrics();
+    client.emit('fetch-total-orders', {
+      totalOrders:
+        metrics.successfulOrders + metrics.failedOrders + metrics.pendingOrders,
+    });
+  }
+
+  @SubscribeMessage('fetch-inventory-updates')
+  async handleFetchInventoryUpdates(
+    @ConnectedSocket() client: Socket,
+  ): Promise<void> {
+    const products = await this.metricsService.getAllProductsWithStock();
+    client.emit('fetch-inventory-updates', { products });
+  }
+
   @SubscribeMessage('subscribe-metrics')
   async handleSubscription(@ConnectedSocket() client: Socket): Promise<void> {
     // Clear existing interval if any
@@ -111,7 +131,9 @@ export class MonitoringGateway
   }
 
   @SubscribeMessage('get-benchmark-report')
-  async handleBenchmarkRequest(@ConnectedSocket() client: Socket): Promise<void> {
+  async handleBenchmarkRequest(
+    @ConnectedSocket() client: Socket,
+  ): Promise<void> {
     try {
       const report = await this.metricsService.generateBenchmarkReport();
       client.emit('benchmark-report', report);
